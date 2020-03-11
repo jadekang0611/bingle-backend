@@ -46,29 +46,29 @@ app.post('/api/create/user', (req, res) => {
 });
 
 // GET users
-app.get("/api/read/users", (req, res) => {
+app.get('/api/read/users', (req, res) => {
   (async () => {
     try {
-      let query = db.collection("users");
+      let query = db.collection('users');
       let response = [];
       await query.get().then(querySnapshot => {
         let docs = querySnapshot.docs;
         for (let doc of docs) {
-            const selectedItem = {
-              id: doc.id,
-              name: doc.data().name,
-              email: doc.data().email,
-              bootcamp: doc.data().bootcamp,
-              followers: doc.data().followers,
-              following: doc.data().following,
-              blurb: doc.data().blurb,
-              github: doc.data().github,
-              photo: doc.data().photo,
-              projects: doc.data().projects,
-              title: doc.data().title
-            };
-            console.log(`Current Doc: ${doc}`);
-            response.push(selectedItem);
+          const selectedItem = {
+            id: doc.id,
+            name: doc.data().name,
+            email: doc.data().email,
+            bootcamp: doc.data().bootcamp,
+            followers: doc.data().followers,
+            following: doc.data().following,
+            blurb: doc.data().blurb,
+            github: doc.data().github,
+            photo: doc.data().photo,
+            projects: doc.data().projects,
+            title: doc.data().title
+          };
+          console.log(`Current Doc: ${doc}`);
+          response.push(selectedItem);
         }
         return response;
       });
@@ -79,4 +79,70 @@ app.get("/api/read/users", (req, res) => {
     }
   })();
 });
+
+// get user by id //
+app.get("/api/read/user/", (req, res) => {
+  (async () => {
+    try {
+      let document = db.collection("users").doc(`${req.body.uid}`);
+      let user = await document.get();
+      let data = user.data();
+      let response = [];
+      const userObj = {
+        name: data.name,
+        email: data.email,
+        blurb: data.blurb,
+        bootcamp: data.bootcamp,
+        completion: data.completion,
+        title: data.title,
+        followers: data.followers,
+        following: data.following,
+        github: data.github,
+        photo: data.photo,
+        projects: data.projects
+      };
+      response.push(userObj);
+      return res.status(200).send(response);
+    } catch (e) {
+      console.log(e);
+      return res.status(500).send(e);
+    }
+  })();
+});
+
+
+
+// create user's profile //
+app.put('/api/create/user/profile', (req, res) => {
+  (async () => {
+    try {
+      let name = req.body.name;
+      let photo = req.body.photo;
+      let title = req.body.title;
+      let completion = req.body.completion;
+      let github = req.body.github;
+      let blurb = req.body.blurb;
+      await db
+        .collection('users')
+        .doc('/' + req.body.id + '/')
+        .update(
+          {
+            name: name,
+            photo: photo,
+            title: title,
+            completion: completion,
+            github: github,
+            blurb: blurb
+          },
+          { merge: true }
+        );
+     
+      return res.status(200).send();
+    } catch (e) {
+      console.log(e);
+      return res.status(500).send(e);
+    }
+  })();
+});
+
 exports.app = functions.https.onRequest(app);
