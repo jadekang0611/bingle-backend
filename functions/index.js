@@ -35,7 +35,8 @@ app.post('/api/create/user', (req, res) => {
           email: req.body.email,
           projects: [],
           title: req.body.title,
-          github: ''
+          github: '',
+          uid: req.body.id
         });
       return res.status(200).send();
     } catch (err) {
@@ -140,5 +141,60 @@ app.put('/api/create/user/profile', (req, res) => {
     }
   })();
 });
+
+// add project to portfolio
+app.put('/api/create/project', (req, res) => {
+  (async () => {
+    try {
+      let userRef = db.collection('users').doc('/' + req.body.id + '/');
+      let data = {
+        src: req.body.src,
+        url: req.body.url
+      };
+
+      await userRef.update({
+        projects: admin.firestore.FieldValue.arrayUnion(data)
+      });
+      return res.status(200).send();
+    } catch (e) {
+      return res.status(500).send(e);
+    }
+  })();
+});
+
+//return followers
+app.get('/api/read/followers/:uid', (req, res) => {
+  (async () => {
+    try {
+      let document = db.collection('users').doc('/' + req.params.uid + '/');
+      let user = await document.get();
+      let data = user.data();
+      let response = [];
+      response = data.followers;
+      return res.status(200).send(response);
+    } catch (e) {
+      console.log(e);
+      return res.status(500).send(e);
+    }
+  })();
+});
+
+//return followers
+app.get('/api/read/following/:uid', (req, res) => {
+  (async () => {
+    try {
+      let document = db.collection('users').doc('/' + req.params.uid + '/');
+      let user = await document.get();
+      let data = user.data();
+      let response = [];
+      response = data.following;
+      return res.status(200).send(response);
+    } catch (e) {
+      console.log(e);
+      return res.status(500).send(e);
+    }
+  })();
+});
+
 
 exports.app = functions.https.onRequest(app);
