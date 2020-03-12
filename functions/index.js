@@ -100,7 +100,9 @@ app.get('/api/read/user/:uid', (req, res) => {
         following: data.following,
         github: data.github,
         photo: data.photo,
-        projects: data.projects
+        projects: data.projects,
+        followersCount: data.followers.length,
+        followingCount: data.following.length
       };
       response.push(userObj);
       return res.status(200).send(response);
@@ -196,5 +198,28 @@ app.get('/api/read/following/:uid', (req, res) => {
   })();
 });
 
+// follow user
+app.put('/api/create/follow', (req, res) => {
+  (async () => {
+    try {
+      let uid = req.body.uid;
+      let followId = req.body.followId;
+
+      // Add following
+      let document = db.collection('users').doc('/' + uid + '/');
+      await document.update({
+        following: admin.firestore.FieldValue.arrayUnion(followId)
+      });
+
+      let doc = db.collection('users').doc('/' + followId + '/');
+      await doc.update({
+        followers: admin.firestore.FieldValue.arrayUnion(uid)
+      });
+      return res.status(200).send();
+    } catch (e) {
+      return res.status(500).send(e);
+    }
+  })();
+});
 
 exports.app = functions.https.onRequest(app);
