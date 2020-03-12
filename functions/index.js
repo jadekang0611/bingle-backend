@@ -81,10 +81,10 @@ app.get('/api/read/users', (req, res) => {
 });
 
 // get user by id //
-app.get("/api/read/user/", (req, res) => {
+app.get('/api/read/user/:uid', (req, res) => {
   (async () => {
     try {
-      let document = db.collection("users").doc(`${req.body.uid}`);
+      let document = db.collection('users').doc(`${req.params.uid}`);
       let user = await document.get();
       let data = user.data();
       let response = [];
@@ -110,33 +110,29 @@ app.get("/api/read/user/", (req, res) => {
   })();
 });
 
-
-
-// create user's profile //
+// update user's profile //
 app.put('/api/create/user/profile', (req, res) => {
   (async () => {
     try {
       let name = req.body.name;
       let photo = req.body.photo;
       let title = req.body.title;
-      let completion = req.body.completion;
       let github = req.body.github;
       let blurb = req.body.blurb;
       await db
         .collection('users')
         .doc('/' + req.body.id + '/')
-        .update(
+        .set(
           {
             name: name,
             photo: photo,
             title: title,
-            completion: completion,
             github: github,
             blurb: blurb
           },
           { merge: true }
         );
-     
+
       return res.status(200).send();
     } catch (e) {
       console.log(e);
