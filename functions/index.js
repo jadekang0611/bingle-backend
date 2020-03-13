@@ -102,7 +102,8 @@ app.get('/api/read/user/:uid', (req, res) => {
         photo: data.photo,
         projects: data.projects,
         followersCount: data.followers.length,
-        followingCount: data.following.length
+        followingCount: data.following.length,
+        uid: data.uid
       };
       response.push(userObj);
       return res.status(200).send(response);
