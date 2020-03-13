@@ -182,7 +182,7 @@ app.get('/api/read/followers/:uid', (req, res) => {
   })();
 });
 
-//return followers
+//return following
 app.get('/api/read/following/:uid', (req, res) => {
   (async () => {
     try {
